@@ -1,6 +1,4 @@
-# PINN4ME: Physics-Informed Neural Network for Milne-Eddington Inversion
-
-A deep learning approach to solar magnetic field inversion using Physics-Informed Neural Networks (PINNs) for Milne-Eddington (ME) inversion of Stokes profiles.
+# MVPinn: Integrating Milne-Eddington Inversion with Physics-Informed Neural Networks for GST/NIRIS Observations
 
 ## Overview
 
@@ -11,7 +9,6 @@ This project implements a Physics-Informed Neural Network (PINN) for performing 
 - **Physics-Informed Architecture**: The ME forward model is integrated into the neural network, allowing end-to-end training with physics constraints
 - **Efficient Training**: Uses PyTorch for GPU-accelerated training
 - **Batch Processing**: Supports batch inference for large datasets
-- **Flexible Input**: Works with FITS files containing Stokes profiles
 
 ## Architecture
 
@@ -38,9 +35,9 @@ The model consists of:
 ### Prerequisites
 
 - Python 3.8+
-- CUDA-capable GPU (recommended)
+- CUDA-capable GPU 
 - Conda (for environment management)
-
+- torch >= 1.10.0
 ### Setup
 
 1. Clone the repository:
@@ -51,8 +48,8 @@ cd PINN4ME
 
 2. Create and activate the conda environment:
 ```bash
-conda create -n PINN-torch python=3.8
-conda activate PINN-torch
+conda create -n MVPinn-torch python=3.8
+conda activate MVPinn-torch
 ```
 
 3. Install dependencies:
