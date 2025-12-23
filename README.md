@@ -135,11 +135,21 @@ The code expects FITS files with the following structure:
 If you use this code in your research, please cite:
 
 ```bibtex
-@software{pinn4me,
-  title={PINN4ME: Physics-Informed Neural Network for Milne-Eddington Inversion},
-  author={Your Name},
-  year={2024},
-  url={https://github.com/yourusername/PINN4ME}
+@ARTICLE{2025arXiv250709430L,
+       author = {{Li}, Qin and {Shen}, Bo and {Jiang}, Haodi and {Yurchyshyn}, Vasyl B. and {Baildon}, Taylor and {Yi}, Kangwoo and {Cao}, Wenda and {Wang}, Haimin},
+        title = "{MVPinn: Integrating Milne-Eddington Inversion with Physics-Informed Neural Networks for GST/NIRIS Observations}",
+      journal = {arXiv e-prints},
+     keywords = {Solar and Stellar Astrophysics, Instrumentation and Methods for Astrophysics},
+         year = 2025,
+        month = jul,
+          eid = {arXiv:2507.09430},
+        pages = {arXiv:2507.09430},
+          doi = {10.48550/arXiv.2507.09430},
+archivePrefix = {arXiv},
+       eprint = {2507.09430},
+ primaryClass = {astro-ph.SR},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2025arXiv250709430L},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 ```
 
