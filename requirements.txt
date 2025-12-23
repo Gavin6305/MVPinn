@@ -1,0 +1,10 @@
+torch>=1.10.0
+numpy>=1.21.0
+astropy>=4.0.0
+matplotlib>=3.5.0
+tqdm>=4.62.0
+scipy>=1.7.0
+scikit-image>=0.19.0
+lmfit>=1.0.0
+sunpy>=3.0.0
+
