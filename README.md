@@ -118,15 +118,6 @@ PINN4ME/
 └── README.md             # This file
 ```
 
-## Data Format
-
-The code expects FITS files with the following structure:
-- 4D array: `[nx, ny, nwavelengths, 4]` where the last dimension contains Stokes I, Q, U, V
-- FITS header should contain:
-  - `STARTWV`: Starting wavelength
-  - `ENDWV`: Ending wavelength
-  - `CDELT1`, `CDELT2`: Pixel scales
-
 ## Citation
 
 If you use this code in your research, please cite:
@@ -161,6 +152,6 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 ## Contact
 
-For questions or issues, please open an issue on GitHub or contact [ql47@njit.edu].
+For questions or issues, please contact [ql47@njit.edu].
 
 # MVPinn
