@@ -143,8 +143,6 @@ This project is licensed under the MIT License. See the LICENSE file for details
 - BBSO/NIRIS for observational data
 - PyTorch team for the deep learning framework
 
-## Contact
-
 For questions or issues, please contact [ql47@njit.edu].
 
 # MVPinn
