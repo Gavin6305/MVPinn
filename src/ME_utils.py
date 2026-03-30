@@ -291,7 +291,7 @@ def niris_mefit(x: np.ndarray, data: np.ndarray, initial_params: np.ndarray,
     # Perform the fit
     popt, pcov = curve_fit(niris_MEsinglet, x, np.swapaxes(data, 0, 1).flatten(), 
                       p0=initial_params,
-                      sigma=weights, 
+                      sigma=weights,
                       bounds=bounds, 
                       maxfev=10,
                       method='lm')
@@ -304,36 +304,41 @@ def niris_mefit(x: np.ndarray, data: np.ndarray, initial_params: np.ndarray,
             
     return popt, chisq
 
-def niris_mefit_lmfit(x: np.ndarray, data: np.ndarray, initial_params: np.ndarray, 
-                display: bool = False, max_nfev: int = 50) -> Tuple[np.ndarray, float]:
+def niris_mefit_lmfit(x: np.ndarray,
+                      data: np.ndarray,
+                      initial_params: np.ndarray,
+                      display: bool = False,
+                      max_nfev: int = 50) -> Tuple[np.ndarray, float]:
     """
     Perform ME fitting using lmfit
-    
+
     Parameters:
         x (np.ndarray): wavelength array
         data (np.ndarray): observed Stokes profiles
         initial_params (np.ndarray): initial parameter estimates
         display (bool): whether to display fit results
         max_nfev (int): maximum number of function evaluations
-        
+
     Returns:
         Tuple[np.ndarray, float]: (best fit parameters, chi-square value)
     """
     n = len(x) // 4
-    
+
     # Calculate weights based on noise
-    weights = np.array([get_noise(data[:,0])] * n)
+    weights_sigma = np.array([get_noise(data[:, 0])] * n)
     for k in range(1, 4):
-        weights = np.concatenate([weights, [get_noise(data[:,k])] * n])
-    weights = 1.0 / weights**2
-    
+        weights_sigma = np.concatenate([weights_sigma, [get_noise(data[:, k])] * n])
+
+    # lmfit squares weights internally, no need to square it here
+    weights_sigma = 1.0 / weights_sigma
+
     # Create lmfit Parameters object
     params = Parameters()
     param_names = ['B', 'theta', 'chi', 'eta0', 'dlambdaD', 'a', 'lambda0', 'B0', 'B1']
     bounds = {
         'B': (0, 5000),
         'theta': (0, np.pi),
-        'chi': (0, np.pi), 
+        'chi': (0, np.pi),
         'eta0': (0.5, 20),
         'dlambdaD': (0.12, 0.25),
         'a': (0, 10),
@@ -341,56 +346,54 @@ def niris_mefit_lmfit(x: np.ndarray, data: np.ndarray, initial_params: np.ndarra
         'B0': (-np.inf, np.inf),
         'B1': (-np.inf, np.inf)
     }
-    
+
     # Add parameters with bounds
     for name, value, (min_val, max_val) in zip(param_names, initial_params, bounds.values()):
         params.add(name, value=value, min=min_val, max=max_val, vary=True)
-    
+
     # Create model
     def model_func(x, B, theta, chi, eta0, dlambdaD, a, lambda0, B0, B1):
         return niris_MEsinglet(x, B, theta, chi, eta0, dlambdaD, a, lambda0, B0, B1)
-    
+
     model = Model(model_func)
-    
+
     # Set up fit options for numerical derivatives
     # For leastsq method, epsfcn controls the step size for numerical derivatives
     fit_kws = {
         'ftol': 1e-4,  # Function tolerance
         'gtol': 1e-4,  # Gradient tolerance
         'xtol': 1e-4,  # Parameter tolerance
-        'epsfcn': 1e-7   # Step size for numerical derivatives
+        'epsfcn': 1e-7  # Step size for numerical derivatives
     }
-    
+
     data_flat = np.swapaxes(data, 0, 1).flatten()
-    
+
     # Use numerical derivatives by setting calc_covar=False
-    result = model.fit(data_flat, 
-                      params, 
-                      x=x, 
-                      weights=weights,
-                      method='leastsq',  # Levenberg-Marquardt
-                      max_nfev=max_nfev,
-                      calc_covar=False,  # Don't calculate covariance matrix analytically
-                      fit_kws=fit_kws)
-    
+    result = model.fit(data_flat,
+                       params,
+                       x=x,
+                       weights=weights_sigma,
+                       method='leastsq',  # Levenberg-Marquardt
+                       max_nfev=max_nfev,
+                       calc_covar=False,  # Don't calculate covariance matrix analytically
+                       fit_kws=fit_kws)
+
     # Get best fit parameters
     popt = np.array([result.params[name].value for name in param_names])
-    
+
     # Calculate chi-square
     fitted = niris_MEsinglet(x, *popt)
-    chisq = np.sum(weights * (data_flat - fitted)**2) / (4 * n)
-    # figs, axs = plt.subplots(1, 2, figsize=(12, 4))
-    # axs[0].plot(data_flat)
-    # axs[0].plot(fitted)
-    # axs[1].plot(weights * (data_flat - fitted)**2)
-    # plt.show()
+
+    # For manual chisq calculation, use 1 / sigma^2
+    chisq = np.sum(weights_sigma ** 2 * (data_flat - fitted) ** 2) / (4 * n - 9)    # 9 fewer degrees of freedom
+
     if display:
         plot_fit_results(x, data_flat, fitted)
-        
+
         # Additional fit diagnostics from lmfit
         print("\nFit Report:")
         print(result.fit_report())
-            
+
     return popt, chisq
 
 def plot_fit_results(x: np.ndarray, data: np.ndarray, fitted: np.ndarray):
@@ -554,7 +557,7 @@ def process_ME_inversion(data_file: Path) -> None:
                 result_popt, chisq = niris_mefit_lmfit(x, data, par, display=False)
                 yfit = niris_MEsinglet(x, *result_popt)
                 fit_array[xpos, ypos] = yfit.reshape(4, -1).T
-                chisqa[xpos, ypos] = chisq / (len(s) * 4)
+                chisqa[xpos, ypos] = chisq      # niris_mefit_lmfit already returns a reduced chi-square
                 parmap[xpos, ypos] = result_popt
                 parmap_wfa[xpos, ypos] = par
                 
@@ -627,7 +630,7 @@ def process_single_row(xpos: int, params: dict, max_nfev: int = 50) -> tuple:
             result_popt, chisq= niris_mefit_lmfit(x, data, par, display=False, max_nfev=max_nfev)
             yfit = niris_MEsinglet(x, *result_popt)
             row_fit_array[ypos] = yfit.reshape(4, -1).T
-            row_chisqa[ypos] = chisq / (len(s) * 4)
+            row_chisqa[ypos] = chisq    # niris_mefit_lmfit already returns reduced chi-square
             row_parmap[ypos] = result_popt
             row_parmap_wfa[ypos] = par
             
@@ -1038,7 +1041,7 @@ def process_ME_inversion_single_point(data_file: Path, x_pos: int, y_pos: int, d
     np.save('/project/bs644/ql47/ME/PINN4ME/wavelengths.npy', x)
     np.save('/project/bs644/ql47/ME/PINN4ME/data.npy', data)
     return results
-    
+
 # Example usage:
 if __name__ == "__main__":
     data_file = Path('/project/bs644/ql47/ME/cal_240725_181800.fts')
